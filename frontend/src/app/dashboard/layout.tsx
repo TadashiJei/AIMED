@@ -1,9 +1,10 @@
 'use client';
 
 import { Fragment, useState } from 'react';
-import { Dialog, Transition, Menu } from '@headlessui/react';
+import { Dialog, Menu, Transition } from '@headlessui/react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Bars3Icon,
   XMarkIcon,
@@ -19,7 +20,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
   { name: 'Analysis', href: '/analysis', icon: ChartBarIcon },
-  { name: 'Records', href: '/records', icon: DocumentTextIcon },
+  { name: 'Reports', href: '/reports', icon: DocumentTextIcon },
   { name: 'Profile', href: '/profile', icon: UserIcon },
   { name: 'Settings', href: '/settings', icon: Cog6ToothIcon },
 ];
@@ -38,176 +39,178 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
   const { user, logout } = useAuth();
-  
-  const handleSignOut = () => {
+
+  const handleSignOut = (e: React.MouseEvent) => {
+    e.preventDefault();
     logout();
-    // Redirect to login page
-    window.location.href = '/login';
   };
 
   return (
-    <div>
-      <Transition.Root show={sidebarOpen} as={Fragment}>
-        <Dialog
-          as="div"
-          className="relative z-50 lg:hidden"
-          onClose={setSidebarOpen}
-        >
-          <Transition.Child
-            as={Fragment}
-            enter="transition-opacity ease-linear duration-300"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="transition-opacity ease-linear duration-300"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="fixed inset-0 bg-[#062654]/80" />
-          </Transition.Child>
-
-          <div className="fixed inset-0 flex">
+    <>
+      <div>
+        <Transition.Root show={sidebarOpen} as={Fragment}>
+          <Dialog as="div" className="relative z-50 lg:hidden" onClose={setSidebarOpen}>
             <Transition.Child
               as={Fragment}
-              enter="transition ease-in-out duration-300 transform"
-              enterFrom="-translate-x-full"
-              enterTo="translate-x-0"
-              leave="transition ease-in-out duration-300 transform"
-              leaveFrom="translate-x-0"
-              leaveTo="-translate-x-full"
+              enter="transition-opacity ease-linear duration-300"
+              enterFrom="opacity-0"
+              enterTo="opacity-100"
+              leave="transition-opacity ease-linear duration-300"
+              leaveFrom="opacity-100"
+              leaveTo="opacity-0"
             >
-              <Dialog.Panel className="relative mr-16 flex w-full max-w-xs flex-1">
-                <Transition.Child
-                  as={Fragment}
-                  enter="ease-in-out duration-300"
-                  enterFrom="opacity-0"
-                  enterTo="opacity-100"
-                  leave="ease-in-out duration-300"
-                  leaveFrom="opacity-100"
-                  leaveTo="opacity-0"
-                >
-                  <div className="absolute left-full top-0 flex w-16 justify-center pt-5">
-                    <button
-                      type="button"
-                      className="-m-2.5 p-2.5"
-                      onClick={() => setSidebarOpen(false)}
-                    >
-                      <span className="sr-only">Close sidebar</span>
-                      <XMarkIcon
-                        className="h-6 w-6 text-white"
-                        aria-hidden="true"
-                      />
-                    </button>
-                  </div>
-                </Transition.Child>
-                <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-[#2265A2] px-6 pb-4">
-                  <div className="flex h-16 shrink-0 items-center">
-                    <img
-                      className="h-8 w-auto"
-                      src="/logo.svg"
-                      alt="AIMED"
-                    />
-                  </div>
-                  <nav className="flex flex-1 flex-col">
-                    <ul role="list" className="flex flex-1 flex-col gap-y-7">
-                      <li>
-                        <ul role="list" className="-mx-2 space-y-1">
-                          {navigation.map((item) => (
-                            <li key={item.name}>
-                              <Link
-                                href={item.href}
-                                className={cn(
-                                  pathname === item.href
-                                    ? 'bg-[#062654] text-white'
-                                    : 'text-white hover:bg-[#7FADE0] hover:text-white',
-                                  'group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6'
-                                )}
-                              >
-                                <item.icon
-                                  className="h-6 w-6 shrink-0"
-                                  aria-hidden="true"
-                                />
-                                {item.name}
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      </li>
-                    </ul>
-                  </nav>
-                </div>
-              </Dialog.Panel>
+              <div className="fixed inset-0 bg-gray-900/80" />
             </Transition.Child>
-          </div>
-        </Dialog>
-      </Transition.Root>
 
-      {/* Static sidebar for desktop */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-        <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-[#2265A2] px-6 pb-4">
-          <div className="flex h-16 shrink-0 items-center">
-            <img
-              className="h-8 w-auto"
-              src="/logo.svg"
-              alt="AIMED"
-            />
-          </div>
-          <nav className="flex flex-1 flex-col">
-            <ul role="list" className="flex flex-1 flex-col gap-y-7">
-              <li>
-                <ul role="list" className="-mx-2 space-y-1">
-                  {navigation.map((item) => (
-                    <li key={item.name}>
-                      <Link
-                        href={item.href}
-                        className={cn(
-                          pathname === item.href
-                            ? 'bg-[#062654] text-white'
-                            : 'text-white hover:bg-[#7FADE0] hover:text-white',
-                          'group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6'
-                        )}
+            <div className="fixed inset-0 flex">
+              <Transition.Child
+                as={Fragment}
+                enter="transition ease-in-out duration-300 transform"
+                enterFrom="-translate-x-full"
+                enterTo="translate-x-0"
+                leave="transition ease-in-out duration-300 transform"
+                leaveFrom="translate-x-0"
+                leaveTo="-translate-x-full"
+              >
+                <Dialog.Panel className="relative mr-16 flex w-full max-w-xs flex-1">
+                  <Transition.Child
+                    as={Fragment}
+                    enter="ease-in-out duration-300"
+                    enterFrom="opacity-0"
+                    enterTo="opacity-100"
+                    leave="ease-in-out duration-300"
+                    leaveFrom="opacity-100"
+                    leaveTo="opacity-0"
+                  >
+                    <div className="absolute left-full top-0 flex w-16 justify-center pt-5">
+                      <button
+                        type="button"
+                        className="-m-2.5 p-2.5"
+                        onClick={() => setSidebarOpen(false)}
                       >
-                        <item.icon
-                          className="h-6 w-6 shrink-0"
-                          aria-hidden="true"
-                        />
-                        {item.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </li>
-            </ul>
-          </nav>
+                        <span className="sr-only">Close sidebar</span>
+                        <XMarkIcon className="h-6 w-6 text-white" aria-hidden="true" />
+                      </button>
+                    </div>
+                  </Transition.Child>
+                  {/* Sidebar component, swap this element with another sidebar if you like */}
+                  <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 pb-4 ring-1 ring-white/10">
+                    <div className="flex h-16 shrink-0 items-center">
+                      <Image
+                        src="/logo.svg"
+                        alt="AIMED Logo"
+                        width={32}
+                        height={32}
+                        className="h-8 w-auto"
+                        priority
+                      />
+                    </div>
+                    <nav className="flex flex-1 flex-col">
+                      <ul role="list" className="flex flex-1 flex-col gap-y-7">
+                        <li>
+                          <ul role="list" className="-mx-2 space-y-1">
+                            {navigation.map((item) => (
+                              <li key={item.name}>
+                                <Link
+                                  href={item.href}
+                                  className={cn(
+                                    pathname === item.href
+                                      ? 'bg-gray-800 text-white'
+                                      : 'text-gray-400 hover:text-white hover:bg-gray-800',
+                                    'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                                  )}
+                                >
+                                  <item.icon
+                                    className="h-6 w-6 shrink-0"
+                                    aria-hidden="true"
+                                  />
+                                  {item.name}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </li>
+                      </ul>
+                    </nav>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </Dialog>
+        </Transition.Root>
+
+        {/* Static sidebar for desktop */}
+        <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
+          {/* Sidebar component, swap this element with another sidebar if you like */}
+          <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 pb-4">
+            <div className="flex h-16 shrink-0 items-center">
+              <Image
+                src="/logo.svg"
+                alt="AIMED Logo"
+                width={32}
+                height={32}
+                className="h-8 w-auto"
+                priority
+              />
+            </div>
+            <nav className="flex flex-1 flex-col">
+              <ul role="list" className="flex flex-1 flex-col gap-y-7">
+                <li>
+                  <ul role="list" className="-mx-2 space-y-1">
+                    {navigation.map((item) => (
+                      <li key={item.name}>
+                        <Link
+                          href={item.href}
+                          className={cn(
+                            pathname === item.href
+                              ? 'bg-gray-800 text-white'
+                              : 'text-gray-400 hover:text-white hover:bg-gray-800',
+                            'group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold'
+                          )}
+                        >
+                          <item.icon
+                            className="h-6 w-6 shrink-0"
+                            aria-hidden="true"
+                          />
+                          {item.name}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              </ul>
+            </nav>
+          </div>
         </div>
-      </div>
 
-      <div className="lg:pl-72">
-        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-[#EAF0F7] bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
-          <button
-            type="button"
-            className="-m-2.5 p-2.5 text-[#062654] lg:hidden"
-            onClick={() => setSidebarOpen(true)}
-          >
-            <span className="sr-only">Open sidebar</span>
-            <Bars3Icon className="h-6 w-6" aria-hidden="true" />
-          </button>
+        <div className="lg:pl-72">
+          <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+            <button
+              type="button"
+              className="-m-2.5 p-2.5 text-gray-700 lg:hidden"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <span className="sr-only">Open sidebar</span>
+              <Bars3Icon className="h-6 w-6" aria-hidden="true" />
+            </button>
 
-          {/* Separator */}
-          <div className="h-6 w-px bg-[#EAF0F7] lg:hidden" aria-hidden="true" />
+            {/* Separator */}
+            <div className="h-6 w-px bg-gray-900/10 lg:hidden" aria-hidden="true" />
 
-          <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-            <div className="flex flex-1"></div>
-            <div className="flex items-center gap-x-4 lg:gap-x-6">
-              {/* Profile dropdown */}
-              <div className="relative">
-                <Menu>
+            <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+              <div className="flex flex-1"></div>
+              <div className="flex items-center gap-x-4 lg:gap-x-6">
+                {/* Profile dropdown */}
+                <Menu as="div" className="relative">
                   <Menu.Button className="relative flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                     <span className="absolute -inset-1.5" />
                     <span className="sr-only">Open user menu</span>
-                    <img
+                    <Image
                       className="h-8 w-8 rounded-full"
                       src={user?.imageUrl || (user?.email ? getGravatarUrl(user.email) : '/default-avatar.png')}
                       alt=""
+                      width={32}
+                      height={32}
                     />
                   </Menu.Button>
                   <Transition
@@ -220,12 +223,12 @@ export default function DashboardLayout({
                     leaveTo="transform opacity-0 scale-95"
                   >
                     <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                      {userNavigation.map((item) => (
-                        <Menu.Item key={item.name}>
-                          {({ active }: { active: boolean }) => (
-                            item.name === 'Sign out' ? (
+                      {userNavigation.map((item) =>
+                        item.name === 'Sign out' ? (
+                          <Menu.Item key={item.name}>
+                            {({ active }) => (
                               <a
-                                href="#"
+                                href={item.href}
                                 onClick={handleSignOut}
                                 className={cn(
                                   active ? 'bg-gray-100' : '',
@@ -234,7 +237,11 @@ export default function DashboardLayout({
                               >
                                 {item.name}
                               </a>
-                            ) : (
+                            )}
+                          </Menu.Item>
+                        ) : (
+                          <Menu.Item key={item.name}>
+                            {({ active }) => (
                               <Link
                                 href={item.href}
                                 className={cn(
@@ -244,24 +251,22 @@ export default function DashboardLayout({
                               >
                                 {item.name}
                               </Link>
-                            )
-                          )}
-                        </Menu.Item>
-                      ))}
+                            )}
+                          </Menu.Item>
+                        )
+                      )}
                     </Menu.Items>
                   </Transition>
                 </Menu>
               </div>
             </div>
           </div>
-        </div>
 
-        <main className="min-h-screen bg-[#EAF0F7]">
-          <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-            {children}
-          </div>
-        </main>
+          <main className="py-10">
+            <div className="px-4 sm:px-6 lg:px-8">{children}</div>
+          </main>
+        </div>
       </div>
-    </div>
+    </>
   );
 }

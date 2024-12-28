@@ -1,0 +1,66 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background-start: #001a1a;
+  --background-end: #003333;
+  --card-background: rgba(13, 17, 23, 0.95);
+  --primary-blue: #0066ff;
+  --text-primary: #ffffff;
+  --text-secondary: #a0aec0;
+}
+
+body {
+  background: linear-gradient(135deg, var(--background-start), var(--background-end));
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+.card {
+  background: var(--card-background);
+  border-radius: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+}
+
+.btn-primary {
+  @apply bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors;
+}
+
+.input-field {
+  @apply bg-gray-900 border border-gray-700 text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, #0066ff, #00ccff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-blue);
+  border-radius: 4px;
+}
+
+/* Form styles */
+.form-input {
+  @apply bg-gray-900 border border-gray-700 text-white rounded-lg px-4 py-2;
+}
+
+.form-select {
+  @apply bg-gray-900 border border-gray-700 text-white rounded-lg px-4 py-2;
+}
+
+.form-checkbox {
+  @apply rounded border-gray-700 text-blue-600 focus:ring-blue-500;
+}

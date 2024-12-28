@@ -1,117 +1,108 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
-import { useAuthStore } from '@/stores/auth.store';
-import { useRouter, useSearchParams } from 'next/navigation';
+import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { useAuth } from '@/contexts/AuthContext';
 import toast from 'react-hot-toast';
 
-const schema = yup.object({
-  email: yup.string().email('Invalid email').required('Email is required'),
-  password: yup.string().required('Password is required'),
-});
+export default function Login() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
 
-export default function LoginPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const { login } = useAuthStore();
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm({
-    resolver: yupResolver(schema),
-  });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email || !password) {
+      toast.error('Please enter both email and password');
+      return;
+    }
 
-  const onSubmit = async (data: any) => {
+    setIsLoading(true);
+
     try {
-      await login(data.email, data.password);
-      const from = searchParams.get('from') || '/dashboard';
-      router.push(from);
-      toast.success('Welcome back!');
+      await login(email, password);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to login');
+      console.error('Login error:', error);
+      toast.error(error.message || 'Failed to login');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-gray-50">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
+        <div className="flex justify-center">
+          <Image
+            src="/logo.svg"
+            alt="AIMED Logo"
+            width={100}
+            height={100}
+            priority
+            className="h-20 w-auto"
+          />
+        </div>
+        <h2 className="mt-6 text-center text-3xl font-bold tracking-tight text-gray-900">
           Sign in to your account
         </h2>
+        <p className="mt-2 text-center text-sm text-gray-600">
+          Or{' '}
+          <Link
+            href="/register"
+            className="font-medium text-indigo-600 hover:text-indigo-500"
+          >
+            create a new account
+          </Link>
+        </p>
       </div>
 
-      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
-        <div className="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
-          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label
-                htmlFor="email-input"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
+              <label htmlFor="email" className="sr-only">
                 Email address
               </label>
-              <div className="mt-2">
-                <input
-                  {...register('email')}
-                  id="email-input"
-                  type="email"
-                  autoComplete="email"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                />
-                {errors.email && (
-                  <p className="mt-2 text-sm text-red-600">{errors.email.message}</p>
-                )}
-              </div>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email address"
+                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              />
             </div>
 
             <div>
-              <label
-                htmlFor="password-input"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
+              <label htmlFor="password" className="sr-only">
                 Password
               </label>
-              <div className="mt-2">
-                <input
-                  {...register('password')}
-                  id="password-input"
-                  type="password"
-                  autoComplete="current-password"
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                />
-                {errors.password && (
-                  <p className="mt-2 text-sm text-red-600">{errors.password.message}</p>
-                )}
-              </div>
+              <input
+                id="password"
+                name="password"
+                type="password"
+                autoComplete="current-password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+              />
             </div>
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  autoComplete="remember-me"
-                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                />
-                <label
-                  htmlFor="remember-me"
-                  className="ml-3 block text-sm leading-6 text-gray-900"
-                >
-                  Remember me
-                </label>
-              </div>
-
-              <div className="text-sm leading-6">
+              <div className="text-sm">
                 <Link
                   href="/forgot-password"
-                  className="font-semibold text-indigo-600 hover:text-indigo-500"
+                  className="font-medium text-indigo-600 hover:text-indigo-500"
                 >
-                  Forgot password?
+                  Forgot your password?
                 </Link>
               </div>
             </div>
@@ -119,32 +110,23 @@ export default function LoginPage() {
             <div>
               <button
                 type="submit"
-                disabled={isSubmitting}
-                className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50"
+                disabled={isLoading}
+                className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? 'Signing in...' : 'Sign in'}
+                {isLoading ? (
+                  <div className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Signing in...
+                  </div>
+                ) : (
+                  'Sign in'
+                )}
               </button>
             </div>
           </form>
-
-          <div>
-            <div className="relative mt-10">
-              <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                <div className="w-full border-t border-gray-200" />
-              </div>
-              <div className="relative flex justify-center text-sm font-medium leading-6">
-                <span className="bg-white px-6 text-gray-900">
-                  Don't have an account?{' '}
-                  <Link
-                    href="/register"
-                    className="font-semibold text-indigo-600 hover:text-indigo-500"
-                  >
-                    Sign up
-                  </Link>
-                </span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

@@ -1,8 +1,9 @@
 {
   "/not-found": "app/not-found.js",
-  "/records/page": "app/records/page.js",
-  "/analysis/reports/[id]/page": "app/analysis/reports/[id]/page.js",
-  "/records/[id]/page": "app/records/[id]/page.js",
-  "/analysis/page": "app/analysis/page.js",
-  "/dashboard/page": "app/dashboard/page.js"
+  "/(auth)/admin/login/page": "app/(auth)/admin/login/page.js",
+  "/admin/dashboard/page": "app/admin/dashboard/page.js",
+  "/admin/staff/page": "app/admin/staff/page.js",
+  "/admin/patients/page": "app/admin/patients/page.js",
+  "/admin/analytics/page": "app/admin/analytics/page.js",
+  "/(auth)/login/page": "app/(auth)/login/page.js"
 }

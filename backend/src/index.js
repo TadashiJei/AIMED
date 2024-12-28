@@ -10,6 +10,7 @@ const ApiError = require('./utils/ApiError');
 const authRoutes = require('./routes/auth.routes');
 const analysisRoutes = require('./routes/analysis.routes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const adminRoutes = require('./routes/admin.routes');
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/analysis', analysisRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {
@@ -50,7 +52,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

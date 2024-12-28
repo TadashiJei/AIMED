@@ -33,8 +33,12 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'admin'],
+    enum: ['user', 'admin', 'doctor', 'patient'],
     default: 'user'
+  },
+  lastLogin: {
+    type: Date,
+    default: Date.now
   },
   profile: {
     phoneNumber: String,

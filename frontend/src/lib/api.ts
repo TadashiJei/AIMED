@@ -2,7 +2,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -40,6 +40,7 @@ export const auth = {
   },
   logout: () => {
     Cookies.remove('token');
+    Cookies.remove('isAdmin');
     window.location.href = '/login';
   },
   requestPasswordReset: async (email: string) => {
@@ -53,6 +54,17 @@ export const auth = {
   verifyEmail: async (token: string) => {
     const response = await api.post('/auth/verify-email', { token });
     return response;
+  },
+  adminLogin: async (username: string, password: string) => {
+    const response = await api.post('/admin/login', { username, password });
+    if (response.access_token) {
+      Cookies.set('token', response.access_token);
+      Cookies.set('isAdmin', 'true');
+    }
+    return response;
+  },
+  isAdmin: () => {
+    return Cookies.get('isAdmin') === 'true';
   },
 };
 

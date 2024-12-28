@@ -1,0 +1,13 @@
+Metadata-Version: 2.1
+Name: aimed-backend
+Version: 0.1
+License-File: LICENSE
+Requires-Dist: fastapi
+Requires-Dist: uvicorn
+Requires-Dist: sqlalchemy
+Requires-Dist: pydantic
+Requires-Dist: python-jose[cryptography]
+Requires-Dist: passlib[bcrypt]
+Requires-Dist: python-dotenv
+Requires-Dist: python-multipart
+Requires-Dist: email-validator

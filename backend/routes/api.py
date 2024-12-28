@@ -2,6 +2,8 @@ from fastapi import APIRouter, HTTPException, Depends
 from typing import List
 from datetime import datetime
 from pydantic import BaseModel
+from backend.models.user import User
+from backend.auth.auth_handler import get_current_user
 
 router = APIRouter()
 
