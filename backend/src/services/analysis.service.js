@@ -178,5 +178,6 @@ module.exports = {
   analyzeMedicalText,
   analyzeMedicalDocument,
   generateHealthInsights,
-  analyzeHealthTrends
+  analyzeHealthTrends,
+  detectAnomalies
 };
