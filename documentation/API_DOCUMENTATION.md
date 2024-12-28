@@ -1,261 +1,381 @@
 # AIMED API Documentation
 
 ## API Overview
-The AIMED API provides endpoints for health data collection, prediction, and alert management. All endpoints use JSON for request and response payloads.
+
+The AIMED API provides a comprehensive set of endpoints for managing medical records, user authentication, and AI-powered document analysis. This RESTful API is built using FastAPI and follows OpenAPI (Swagger) specifications.
 
 ## Base URL
-```
-Production: https://api.aimed.com/v1
-Development: http://localhost:7071/api
-```
+
+- Development: `http://localhost:8000`
+- Production: `https://api.aimed.com`
 
 ## Authentication
-All API requests require Bearer token authentication:
+
+The API uses JWT (JSON Web Token) for authentication. Include the token in the Authorization header:
+
 ```http
-Authorization: Bearer <token>
+Authorization: Bearer <your_jwt_token>
 ```
 
-## Endpoints
+### Authentication Endpoints
 
-### Health Data API
-
-#### Get Health Metrics
+#### 1. User Registration
 ```http
-GET /api/health/metrics
-```
-
-**Parameters:**
-- `userId` (string, required): User identifier
-- `timeRange` (string, optional): Time range for metrics (default: "24h")
-  - Options: "24h", "7d", "30d", "custom"
-- `startDate` (string, optional): Start date for custom range (ISO format)
-- `endDate` (string, optional): End date for custom range (ISO format)
-
-**Response:**
-```json
-{
-  "userId": "user123",
-  "metrics": {
-    "heartRate": {
-      "current": 75,
-      "min": 60,
-      "max": 90,
-      "average": 72
-    },
-    "bloodPressure": {
-      "systolic": 120,
-      "diastolic": 80
-    },
-    "oxygenLevel": 98
-  },
-  "timestamp": "2024-12-28T02:22:24Z"
-}
-```
-
-#### Submit Health Data
-```http
-POST /api/health/data
+POST /auth/register
 ```
 
 **Request Body:**
 ```json
 {
-  "userId": "user123",
-  "deviceId": "device456",
-  "metrics": {
-    "heartRate": 75,
-    "bloodPressure": {
-      "systolic": 120,
-      "diastolic": 80
-    },
-    "oxygenLevel": 98
-  },
-  "timestamp": "2024-12-28T02:22:24Z"
+  "email": "string",
+  "password": "string",
+  "full_name": "string",
+  "role": "string"
 }
 ```
 
 **Response:**
 ```json
 {
-  "status": "success",
-  "messageId": "msg789",
-  "timestamp": "2024-12-28T02:22:24Z"
+  "id": "string",
+  "email": "string",
+  "full_name": "string",
+  "role": "string",
+  "created_at": "string"
 }
 ```
 
-### Prediction API
-
-#### Get Health Risk Prediction
+#### 2. User Login
 ```http
-GET /api/predictions/risk
+POST /auth/login
 ```
 
-**Parameters:**
-- `userId` (string, required): User identifier
-- `metrics` (object, required): Current health metrics
-
-**Response:**
+**Request Body:**
 ```json
 {
-  "userId": "user123",
-  "riskAssessment": {
-    "overallRisk": "low",
-    "score": 0.2,
-    "factors": [
-      {
-        "type": "heartRate",
-        "risk": "low",
-        "recommendation": "Continue normal activity"
-      }
-    ]
-  },
-  "timestamp": "2024-12-28T02:22:24Z"
+  "email": "string",
+  "password": "string"
 }
 ```
 
-### Alert API
-
-#### Get User Alerts
-```http
-GET /api/alerts
+**Response:**
+```json
+{
+  "access_token": "string",
+  "token_type": "bearer"
+}
 ```
 
-**Parameters:**
-- `userId` (string, required): User identifier
-- `status` (string, optional): Alert status filter
-  - Options: "active", "resolved", "all"
-- `limit` (number, optional): Maximum number of alerts to return (default: 50)
+#### 3. Token Refresh
+```http
+POST /auth/refresh-token
+```
+
+**Request Header:**
+```http
+Authorization: Bearer <expired_token>
+```
 
 **Response:**
 ```json
 {
-  "userId": "user123",
-  "alerts": [
+  "access_token": "string",
+  "token_type": "bearer"
+}
+```
+
+## Medical Records Management
+
+### 1. Upload Medical Record
+```http
+POST /records/upload
+Content-Type: multipart/form-data
+```
+
+**Request Body:**
+- file: File (required)
+- patient_id: string (required)
+- record_type: string (required)
+- notes: string (optional)
+
+**Response:**
+```json
+{
+  "id": "string",
+  "file_url": "string",
+  "patient_id": "string",
+  "record_type": "string",
+  "notes": "string",
+  "upload_date": "string",
+  "analysis_status": "string"
+}
+```
+
+### 2. Get Medical Record
+```http
+GET /records/{record_id}
+```
+
+**Response:**
+```json
+{
+  "id": "string",
+  "file_url": "string",
+  "patient_id": "string",
+  "record_type": "string",
+  "notes": "string",
+  "upload_date": "string",
+  "analysis_results": {
+    "extracted_text": "string",
+    "key_findings": ["string"],
+    "medical_entities": ["string"]
+  }
+}
+```
+
+### 3. Search Medical Records
+```http
+GET /records/search
+```
+
+**Query Parameters:**
+- patient_id: string (optional)
+- record_type: string (optional)
+- date_from: string (optional)
+- date_to: string (optional)
+- query: string (optional)
+
+**Response:**
+```json
+{
+  "total": 0,
+  "records": [
     {
-      "alertId": "alert123",
-      "type": "highHeartRate",
-      "severity": "medium",
-      "message": "Heart rate above normal range",
-      "timestamp": "2024-12-28T02:22:24Z",
-      "status": "active"
+      "id": "string",
+      "file_url": "string",
+      "patient_id": "string",
+      "record_type": "string",
+      "notes": "string",
+      "upload_date": "string"
     }
-  ],
-  "pagination": {
-    "total": 1,
-    "limit": 50,
-    "offset": 0
-  }
+  ]
 }
 ```
 
-#### Acknowledge Alert
+### 4. Update Medical Record
 ```http
-POST /api/alerts/acknowledge
+PUT /records/{record_id}
 ```
 
 **Request Body:**
 ```json
 {
-  "alertId": "alert123",
-  "userId": "user123",
-  "acknowledgement": {
-    "action": "resolved",
-    "notes": "Patient contacted and confirmed OK"
-  }
+  "notes": "string",
+  "record_type": "string"
 }
 ```
 
 **Response:**
 ```json
 {
-  "status": "success",
-  "alertId": "alert123",
-  "timestamp": "2024-12-28T02:22:24Z"
+  "id": "string",
+  "file_url": "string",
+  "patient_id": "string",
+  "record_type": "string",
+  "notes": "string",
+  "upload_date": "string"
+}
+```
+
+## User Management (Admin Only)
+
+### 1. List Users
+```http
+GET /admin/users
+```
+
+**Query Parameters:**
+- page: integer (default: 1)
+- limit: integer (default: 10)
+- role: string (optional)
+
+**Response:**
+```json
+{
+  "total": 0,
+  "users": [
+    {
+      "id": "string",
+      "email": "string",
+      "full_name": "string",
+      "role": "string",
+      "created_at": "string",
+      "last_login": "string"
+    }
+  ]
+}
+```
+
+### 2. Create User
+```http
+POST /admin/users
+```
+
+**Request Body:**
+```json
+{
+  "email": "string",
+  "password": "string",
+  "full_name": "string",
+  "role": "string"
+}
+```
+
+**Response:**
+```json
+{
+  "id": "string",
+  "email": "string",
+  "full_name": "string",
+  "role": "string",
+  "created_at": "string"
+}
+```
+
+### 3. Update User
+```http
+PUT /admin/users/{user_id}
+```
+
+**Request Body:**
+```json
+{
+  "full_name": "string",
+  "role": "string",
+  "is_active": boolean
+}
+```
+
+**Response:**
+```json
+{
+  "id": "string",
+  "email": "string",
+  "full_name": "string",
+  "role": "string",
+  "is_active": boolean,
+  "updated_at": "string"
 }
 ```
 
 ## Error Responses
 
-### Standard Error Format
+### Common Error Codes
+
+- 400 Bad Request: Invalid input data
+- 401 Unauthorized: Missing or invalid authentication
+- 403 Forbidden: Insufficient permissions
+- 404 Not Found: Resource not found
+- 422 Unprocessable Entity: Validation error
+- 500 Internal Server Error: Server error
+
+### Error Response Format
 ```json
 {
-  "error": {
-    "code": "ERROR_CODE",
-    "message": "Human readable error message",
-    "details": {
-      "field": "Additional error details"
-    }
+  "detail": {
+    "message": "string",
+    "code": "string",
+    "params": {}
   }
 }
 ```
 
-### Common Error Codes
-- `400`: Bad Request
-- `401`: Unauthorized
-- `403`: Forbidden
-- `404`: Not Found
-- `429`: Too Many Requests
-- `500`: Internal Server Error
-
 ## Rate Limiting
-- Default rate limit: 100 requests per minute
-- Exceeded rate limit response: HTTP 429
-- Rate limit headers:
-  ```http
-  X-RateLimit-Limit: 100
-  X-RateLimit-Remaining: 95
-  X-RateLimit-Reset: 1640678544
-  ```
 
-## Webhooks
-For real-time notifications, configure webhooks:
+The API implements rate limiting to ensure fair usage:
 
-```http
-POST /api/webhooks
-```
+- Authentication endpoints: 5 requests per minute
+- Other endpoints: 60 requests per minute per authenticated user
 
-**Request Body:**
-```json
-{
-  "url": "https://your-domain.com/webhook",
-  "events": ["alert.created", "prediction.high_risk"],
-  "secret": "your_webhook_secret"
-}
-```
+## Best Practices
+
+1. **Authentication**
+   - Always store tokens securely
+   - Refresh tokens before they expire
+   - Never send tokens in URL parameters
+
+2. **File Upload**
+   - Maximum file size: 10MB
+   - Supported formats: PDF, JPG, PNG
+   - Use multipart/form-data for file uploads
+
+3. **Error Handling**
+   - Always check response status codes
+   - Implement proper error handling
+   - Log error responses for debugging
+
+4. **Performance**
+   - Use pagination for large datasets
+   - Implement caching where appropriate
+   - Minimize request payload size
 
 ## SDK Examples
 
-### JavaScript/Node.js
-```javascript
-const AimedClient = require('aimed-sdk');
+### Python
+```python
+import requests
 
-const client = new AimedClient({
-  apiKey: 'your_api_key',
-  environment: 'production'
-});
-
-// Get health metrics
-const metrics = await client.health.getMetrics({
-  userId: 'user123',
-  timeRange: '24h'
-});
-
-// Submit health data
-const response = await client.health.submitData({
-  userId: 'user123',
-  metrics: {
-    heartRate: 75,
-    bloodPressure: {
-      systolic: 120,
-      diastolic: 80
-    }
-  }
-});
+class AIMEDClient:
+    def __init__(self, base_url, api_key):
+        self.base_url = base_url
+        self.headers = {"Authorization": f"Bearer {api_key}"}
+    
+    def upload_record(self, file_path, patient_id, record_type):
+        with open(file_path, 'rb') as f:
+            files = {'file': f}
+            data = {
+                'patient_id': patient_id,
+                'record_type': record_type
+            }
+            response = requests.post(
+                f"{self.base_url}/records/upload",
+                headers=self.headers,
+                files=files,
+                data=data
+            )
+            return response.json()
 ```
 
-## Best Practices
-1. Always include error handling
-2. Use appropriate timeouts
-3. Implement exponential backoff for retries
-4. Cache responses when appropriate
-5. Use webhook notifications for real-time updates
+### JavaScript
+```javascript
+class AIMEDClient {
+  constructor(baseUrl, apiKey) {
+    this.baseUrl = baseUrl;
+    this.headers = {
+      Authorization: `Bearer ${apiKey}`
+    };
+  }
+
+  async uploadRecord(file, patientId, recordType) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('patient_id', patientId);
+    formData.append('record_type', recordType);
+
+    const response = await fetch(`${this.baseUrl}/records/upload`, {
+      method: 'POST',
+      headers: this.headers,
+      body: formData
+    });
+
+    return response.json();
+  }
+}
+```
+
+## Support
+
+For API support and questions:
+- Email: api-support@aimed.com
+- Documentation: https://docs.aimed.com
+- Status Page: https://status.aimed.com

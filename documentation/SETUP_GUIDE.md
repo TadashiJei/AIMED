@@ -1,187 +1,224 @@
 # AIMED Setup Guide
 
-## Prerequisites
-- Node.js (v14 or higher)
-- Azure CLI
-- Git
-- Visual Studio Code (recommended)
+This guide provides detailed instructions for setting up the AIMED healthcare management system for both development and production environments.
 
 ## Development Environment Setup
 
-### 1. Node.js and npm Installation
-```bash
-# Check if Node.js is installed
-node --version
-npm --version
+### Prerequisites
 
-# If not installed, download from https://nodejs.org/
-```
+1. **Python Environment**
+   - Python 3.8 or higher
+   - pip (Python package manager)
+   - virtualenv or venv for isolated environments
 
-### 2. Azure CLI Installation
-```bash
-# macOS (using Homebrew)
-brew update && brew install azure-cli
+2. **Node.js Environment**
+   - Node.js 14 or higher
+   - npm (Node package manager)
 
-# Verify installation
-az --version
+3. **Database**
+   - MongoDB (local installation or cloud service)
 
-# Login to Azure
-az login
-```
+4. **Azure Account**
+   - Active Azure subscription
+   - Required services enabled:
+     - Azure Blob Storage
+     - Azure Form Recognizer
+     - Azure Language Service
+     - Azure OpenAI
 
-### 3. Project Setup
-```bash
-# Clone the repository
-git clone [repository-url]
-cd AIMED
+5. **Email Service**
+   - Gmail account with App Password enabled
+   - 2-Step Verification enabled
 
-# Install dependencies
-npm install
-```
+### Step-by-Step Installation
 
-### 4. Azure Services Configuration
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/yourusername/AIMED.git
+   cd AIMED
+   ```
 
-#### Azure Resource Group
-```bash
-# Create resource group
-az group create --name aimed-rg --location eastus
-```
+2. **Backend Setup**
+   ```bash
+   # Create and activate virtual environment
+   cd backend
+   python -m venv venv
+   source venv/bin/activate  # On Windows: .\venv\Scripts\activate
 
-#### Azure IoT Hub
-```bash
-# Create IoT Hub
-az iot hub create --name aimed-iot-hub \
-    --resource-group aimed-rg \
-    --sku S1
-```
+   # Install dependencies
+   pip install -r requirements.txt
 
-#### Azure Functions
-```bash
-# Install Azure Functions Core Tools
-npm install -g azure-functions-core-tools@4
+   # Configure environment variables
+   cp .env.example .env
+   ```
 
-# Create Function App
-az functionapp create \
-    --resource-group aimed-rg \
-    --consumption-plan-location eastus \
-    --runtime node \
-    --functions-version 4 \
-    --name aimed-functions \
-    --storage-account aimedstore
-```
+3. **Frontend Setup**
+   ```bash
+   cd ../frontend
+   npm install
+   ```
 
-#### Azure Machine Learning
-```bash
-# Create ML workspace
-az ml workspace create \
-    --workspace-name aimed-ml \
-    --resource-group aimed-rg
-```
+### Environment Configuration
 
-## Environment Configuration
+1. **Backend Environment Variables**
+   Edit `backend/.env` with your credentials:
 
-### 1. Environment Variables
-Create a `.env` file in the root directory:
-```env
-AZURE_IOT_HUB_CONNECTION_STRING=your_connection_string
-AZURE_FUNCTION_APP_NAME=aimed-functions
-AZURE_ML_WORKSPACE=aimed-ml
-AZURE_KEYVAULT_NAME=aimed-keyvault
-```
+   ```env
+   # Server Configuration
+   PORT=3001
+   JWT_SECRET=your_secure_jwt_secret
+   JWT_EXPIRES_IN=24h
 
-### 2. Azure Key Vault Setup
-```bash
-# Create Key Vault
-az keyvault create \
-    --name aimed-keyvault \
-    --resource-group aimed-rg \
-    --location eastus
-```
+   # MongoDB Configuration
+   MONGODB_URI=your_mongodb_connection_string
 
-## Running the Application
+   # Azure Storage Configuration
+   AZURE_STORAGE_CONNECTION_STRING=your_azure_storage_connection_string
+   AZURE_STORAGE_CONTAINER=health-records
+   MAX_FILE_SIZE=10485760
 
-### Frontend Development
-```bash
-# Start React development server
-cd frontend
-npm start
-```
+   # Azure AI Services
+   AZURE_FORM_RECOGNIZER_KEY=your_form_recognizer_key
+   AZURE_FORM_RECOGNIZER_ENDPOINT=your_form_recognizer_endpoint
+   AZURE_LANGUAGE_KEY=your_language_key
+   AZURE_LANGUAGE_ENDPOINT=your_language_endpoint
+   AZURE_OPENAI_KEY=your_openai_key
 
-### Backend Development
-```bash
-# Start Azure Functions locally
-cd backend
-func start
-```
+   # Email Configuration
+   MAIL_USERNAME=your_email@gmail.com
+   MAIL_PASSWORD=your_app_password
+   MAIL_FROM=your_email@gmail.com
+   MAIL_PORT=587
+   MAIL_SERVER=smtp.gmail.com
+   ```
 
-## Testing
+2. **Frontend Environment Variables**
+   Create `frontend/.env` if needed:
+   ```env
+   REACT_APP_API_URL=http://localhost:8000
+   REACT_APP_STORAGE_URL=your_azure_storage_url
+   ```
 
-### Unit Tests
-```bash
-# Run frontend tests
-cd frontend
-npm test
+### Running the Application
 
-# Run backend tests
-cd backend
-npm test
-```
+1. **Start Backend Server**
+   ```bash
+   cd backend
+   uvicorn main:app --reload --port 8000
+   ```
 
-### Integration Tests
-```bash
-# Run integration tests
-npm run test:integration
-```
+2. **Start Frontend Development Server**
+   ```bash
+   cd frontend
+   npm start
+   ```
 
-## Deployment
+3. **Access the Application**
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:8000
+   - API Documentation: http://localhost:8000/docs
 
-### Frontend Deployment
-```bash
-# Build React app
-cd frontend
-npm run build
+## Production Deployment
 
-# Deploy to Azure Static Web Apps
-az staticwebapp create \
-    --name aimed-web \
-    --resource-group aimed-rg \
-    --source https://github.com/your-repo
-```
+### Azure App Service Deployment
 
-### Backend Deployment
-```bash
-# Deploy Azure Functions
-cd backend
-func azure functionapp publish aimed-functions
-```
+1. **Backend Deployment**
+   ```bash
+   # Install Azure CLI
+   az login
+   
+   # Create App Service
+   az webapp up --runtime PYTHON:3.8 --sku B1 --name aimed-backend
+   
+   # Configure environment variables
+   az webapp config appsettings set --settings @env.json --name aimed-backend
+   ```
 
-## Monitoring Setup
+2. **Frontend Deployment**
+   ```bash
+   # Build frontend
+   npm run build
+   
+   # Deploy to Azure Static Web Apps
+   az staticwebapp create --name aimed-frontend
+   az staticwebapp deploy
+   ```
 
-### Application Insights
-```bash
-# Create Application Insights
-az monitor app-insights component create \
-    --app aimed-insights \
-    --location eastus \
-    --resource-group aimed-rg
-```
+### Security Considerations
+
+1. **SSL/TLS Configuration**
+   - Enable HTTPS-only mode in Azure App Service
+   - Configure custom domain and SSL certificate
+
+2. **Environment Variables**
+   - Use Azure Key Vault for sensitive credentials
+   - Enable managed identities for secure access
+
+3. **Network Security**
+   - Configure network security groups
+   - Set up Azure Application Gateway if needed
+
+### Monitoring Setup
+
+1. **Azure Application Insights**
+   - Enable Application Insights in Azure Portal
+   - Add instrumentation key to application settings
+
+2. **Logging Configuration**
+   - Configure log levels in application settings
+   - Set up log retention policies
 
 ## Troubleshooting
 
 ### Common Issues
-1. **Azure Functions not running locally**
-   - Check if Azure Functions Core Tools is installed
-   - Verify local.settings.json configuration
 
-2. **IoT Hub Connection Issues**
-   - Verify connection string in environment variables
-   - Check device registration status
+1. **MongoDB Connection**
+   - Verify connection string format
+   - Check network connectivity
+   - Ensure IP whitelist includes your server
 
-3. **ML Model Deployment Issues**
-   - Verify ML workspace configuration
-   - Check model version and endpoints
+2. **Azure Services**
+   - Verify service keys and endpoints
+   - Check service quota limits
+   - Review Azure service health status
+
+3. **Email Configuration**
+   - Verify Gmail App Password
+   - Check SMTP settings
+   - Test email connectivity
 
 ### Getting Help
-- Azure Documentation: https://docs.microsoft.com/azure
-- Project Issues: [GitHub Issues Page]
-- Support Email: [support@aimed.com]
+
+- Check the [GitHub Issues](https://github.com/yourusername/AIMED/issues)
+- Review the [FAQ](./FAQ.md)
+- Contact the development team
+
+## Maintenance
+
+### Regular Updates
+
+1. **Dependency Updates**
+   ```bash
+   # Update Python dependencies
+   pip install -r requirements.txt --upgrade
+   
+   # Update Node.js dependencies
+   npm update
+   ```
+
+2. **Database Maintenance**
+   - Regular backups
+   - Index optimization
+   - Data cleanup
+
+### Health Checks
+
+1. **System Health**
+   - Monitor API endpoints
+   - Check database connections
+   - Verify Azure service status
+
+2. **Performance Monitoring**
+   - Review Application Insights metrics
+   - Monitor response times
+   - Check resource utilization
