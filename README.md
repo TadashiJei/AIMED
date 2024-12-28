@@ -62,7 +62,7 @@ AIMED is an innovative healthcare management system that leverages artificial in
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/AIMED.git
+   git clone https://github.com/tadashijei/AIMED.git
    cd AIMED
    ```
 
@@ -154,7 +154,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Contact
 
-Project Link: [https://github.com/yourusername/AIMED](https://github.com/yourusername/AIMED)
+Project Link: [https://github.com/tadashijei/AIMED](https://github.com/tadashijei/AIMED)
 
 ## Acknowledgments
 
