@@ -126,37 +126,41 @@ exports.resetPassword = catchAsync(async (req, res) => {
 
 exports.login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
-  
+
   // Find user
   const user = await User.findOne({ email });
   if (!user) {
-    throw new ApiError(401, 'Invalid credentials');
-  }
-
-  // Check if email is verified
-  if (!user.isVerified) {
-    throw new ApiError(401, 'Please verify your email first');
+    throw new ApiError(401, 'Invalid email or password');
   }
 
   // Check password
-  const isValid = await user.comparePassword(password);
-  if (!isValid) {
-    throw new ApiError(401, 'Invalid credentials');
+  const isMatch = await user.comparePassword(password);
+  if (!isMatch) {
+    throw new ApiError(401, 'Invalid email or password');
   }
 
-  // Generate token
+  // Check if user is verified
+  if (!user.isVerified) {
+    throw new ApiError(401, 'Please verify your email before logging in');
+  }
+
+  // Generate JWT token
   const token = jwt.sign(
-    { userId: user._id },
+    { id: user._id },
     process.env.JWT_SECRET,
-    { expiresIn: '1h' }
+    { expiresIn: process.env.JWT_EXPIRES_IN }
   );
 
   res.json({
     status: 'success',
     data: {
       token,
-      userId: user._id,
-      onboarded: user.onboarded
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
     }
   });
 });
@@ -188,29 +192,26 @@ exports.updateProfile = catchAsync(async (req, res) => {
     medicalInfo
   } = req.body;
 
-  const user = await User.findById(userId);
+  const user = await User.findByIdAndUpdate(
+    userId,
+    {
+      phoneNumber,
+      dateOfBirth,
+      gender,
+      address,
+      emergencyContact,
+      medicalInfo
+    },
+    { new: true, runValidators: true }
+  );
+
   if (!user) {
     throw new ApiError(404, 'User not found');
   }
 
-  // Update profile fields
-  user.profile = {
-    ...user.profile,
-    phoneNumber: phoneNumber || user.profile.phoneNumber,
-    dateOfBirth: dateOfBirth || user.profile.dateOfBirth,
-    gender: gender || user.profile.gender,
-    address: address || user.profile.address,
-    emergencyContact: emergencyContact || user.profile.emergencyContact,
-    medicalInfo: medicalInfo || user.profile.medicalInfo
-  };
-
-  await user.save();
-
   res.json({
     status: 'success',
-    data: {
-      profile: user.profile
-    }
+    data: { user }
   });
 });
 
@@ -256,6 +257,45 @@ exports.onboarding = catchAsync(async (req, res) => {
     data: {
       metrics: user.metrics,
       onboarded: true
+    }
+  });
+});
+
+// Create test user - only for development
+exports.createTestUser = catchAsync(async (req, res) => {
+  // Check if test user already exists
+  const testEmail = 'test@example.com';
+  let user = await User.findOne({ email: testEmail });
+  
+  if (user) {
+    // If test user exists, return their credentials
+    res.json({
+      status: 'success',
+      message: 'Test user already exists',
+      data: {
+        email: testEmail,
+        password: 'Test123!'
+      }
+    });
+    return;
+  }
+
+  // Create new test user
+  user = new User({
+    email: testEmail,
+    password: 'Test123!',
+    name: 'Test User',
+    isVerified: true
+  });
+
+  await user.save();
+
+  res.json({
+    status: 'success',
+    message: 'Test user created',
+    data: {
+      email: testEmail,
+      password: 'Test123!'
     }
   });
 });

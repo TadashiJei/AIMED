@@ -9,6 +9,7 @@ const ApiError = require('./utils/ApiError');
 // Import routes
 const authRoutes = require('./routes/auth.routes');
 const analysisRoutes = require('./routes/analysis.routes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use(express.urlencoded({ extended: true }));
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/analysis', analysisRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Health check route
 app.get('/health', (req, res) => {

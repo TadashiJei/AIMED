@@ -34,6 +34,11 @@ router.post('/login', validate([
   body('password').exists()
 ]), authController.login);
 
+// Test route - only for development
+if (process.env.NODE_ENV === 'development') {
+  router.post('/create-test-user', authController.createTestUser);
+}
+
 // Email verification
 router.get('/verify-email/:token', authController.verifyEmail);
 

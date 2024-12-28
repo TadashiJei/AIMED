@@ -49,7 +49,7 @@ export default function LoginPage() {
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div>
               <label
-                htmlFor="email"
+                htmlFor="email-input"
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
                 Email address
@@ -57,7 +57,9 @@ export default function LoginPage() {
               <div className="mt-2">
                 <input
                   {...register('email')}
+                  id="email-input"
                   type="email"
+                  autoComplete="email"
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
                 {errors.email && (
@@ -68,7 +70,7 @@ export default function LoginPage() {
 
             <div>
               <label
-                htmlFor="password"
+                htmlFor="password-input"
                 className="block text-sm font-medium leading-6 text-gray-900"
               >
                 Password
@@ -76,7 +78,9 @@ export default function LoginPage() {
               <div className="mt-2">
                 <input
                   {...register('password')}
+                  id="password-input"
                   type="password"
+                  autoComplete="current-password"
                   className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                 />
                 {errors.password && (
@@ -91,6 +95,7 @@ export default function LoginPage() {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
+                  autoComplete="remember-me"
                   className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
                 />
                 <label

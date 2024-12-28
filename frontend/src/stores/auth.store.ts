@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { auth as authApi } from '@/lib/api';
+import Cookies from 'js-cookie';
 
 interface User {
   id: string;
@@ -22,16 +23,17 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
-  token: typeof window !== 'undefined' ? localStorage.getItem('token') : null,
-  isAuthenticated: typeof window !== 'undefined' ? !!localStorage.getItem('token') : false,
+  token: typeof window !== 'undefined' ? Cookies.get('token') : null,
+  isAuthenticated: typeof window !== 'undefined' ? !!Cookies.get('token') : false,
   isLoading: false,
   error: null,
 
   login: async (email: string, password: string) => {
     set({ isLoading: true, error: null });
     try {
-      const { token, user } = await authApi.login(email, password);
-      localStorage.setItem('token', token);
+      const response = await authApi.login(email, password);
+      const { token, user } = response.data;
+      Cookies.set('token', token, { expires: 1 }); // Expires in 1 day
       set({ user, token, isAuthenticated: true, isLoading: false });
     } catch (error: any) {
       set({
@@ -45,8 +47,9 @@ export const useAuthStore = create<AuthState>((set) => ({
   register: async (userData: any) => {
     set({ isLoading: true, error: null });
     try {
-      const { token, user } = await authApi.register(userData);
-      localStorage.setItem('token', token);
+      const response = await authApi.register(userData);
+      const { token, user } = response.data;
+      Cookies.set('token', token, { expires: 1 }); // Expires in 1 day
       set({ user, token, isAuthenticated: true, isLoading: false });
     } catch (error: any) {
       set({
@@ -58,7 +61,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: () => {
-    authApi.logout();
+    Cookies.remove('token');
     set({ user: null, token: null, isAuthenticated: false });
   },
 
